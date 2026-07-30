@@ -14,10 +14,10 @@ if (supabaseUrl) {
 }
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   poweredByHeader: false,
   compress: true,
   experimental: {
-    proxyClientMaxBodySize: "11mb",
     serverActions: {
       bodySizeLimit: "11mb",
     },
