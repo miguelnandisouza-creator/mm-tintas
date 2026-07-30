@@ -24,7 +24,7 @@ export const siteConfig = {
   locale: "pt_BR",
   city: "Tubarão",
   region: "SC",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5548999627339",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "",
   nav: [
     { label: "Início", href: "/" },

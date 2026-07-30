@@ -58,7 +58,7 @@ const placeholderValues: SettingsValues = {
     "Tintas, acessórios e complementos para sua obra em Tubarão e região.",
   cnpj: "",
   phone: "(48) 0000-0000",
-  whatsapp: "(48) 99999-9999",
+  whatsapp: "(48) 99962-7339",
   email: "contato@mmtintas.com.br",
   address: "Endereço da loja",
   neighborhood: "Centro",
