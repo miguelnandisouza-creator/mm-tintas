@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -63,10 +64,15 @@ function SidebarContent({
           onClick={onClose}
           className="flex min-w-0 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
         >
-          <span className="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-white text-[#0c1b32]">
-            <span className="absolute -left-2 top-0 h-full w-4 rotate-12 bg-amber-400" />
-            <span className="absolute bottom-0 right-0 size-4 rounded-tl-xl bg-blue-600" />
-            <span className="relative text-sm font-black tracking-tight">MM</span>
+          <span className="rounded-xl bg-white px-2 py-1.5">
+            <Image
+              src="/images/brand/mm-tintas-logo.png"
+              alt="MM Tintas e Complementos"
+              width={1097}
+              height={333}
+              priority
+              className="h-auto w-32 object-contain"
+            />
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-bold tracking-tight">

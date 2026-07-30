@@ -1,5 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Droplets } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -14,23 +14,21 @@ export function Brand({ className, compact = false }: BrandProps) {
       href="/"
       aria-label="MM Tintas — página inicial"
       className={cn(
-        "inline-flex items-center gap-3 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
+        "inline-flex items-center rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
         className,
       )}
     >
-      <span className="grid size-10 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
-        <Droplets aria-hidden="true" className="size-5" />
-      </span>
-      {!compact ? (
-        <span className="leading-none">
-          <span className="block text-lg font-extrabold tracking-[-0.035em]">
-            MM Tintas
-          </span>
-          <span className="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-            e Complementos
-          </span>
-        </span>
-      ) : null}
+      <Image
+        src="/images/brand/mm-tintas-logo.png"
+        alt="MM Tintas e Complementos"
+        width={1097}
+        height={333}
+        priority
+        className={cn(
+          "h-auto object-contain",
+          compact ? "w-12 object-left" : "w-40 sm:w-44",
+        )}
+      />
     </Link>
   );
 }
