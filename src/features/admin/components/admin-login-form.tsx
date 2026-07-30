@@ -9,9 +9,10 @@ import {
   EyeOff,
   LoaderCircle,
   LockKeyhole,
-  Mail,
+  UserRound,
 } from "lucide-react";
 
+import { loginAdmin } from "@/features/admin/login-action";
 import { createClient } from "@/lib/supabase/client";
 
 type AdminLoginFormProps = {
@@ -26,7 +27,7 @@ export function AdminLoginForm({
   demoMode,
 }: AdminLoginFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
@@ -60,21 +61,18 @@ export function AdminLoginForm({
       return;
     }
 
-    if (!email.trim() || password.length < 6) {
-      setError("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.");
+    if (!username.trim() || password.length < 6) {
+      setError("Informe o usuário e a senha.");
       return;
     }
 
     setIsPending(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+      const result = await loginAdmin(username, password);
 
-      if (authError) {
-        setError("E-mail ou senha incorretos. Verifique os dados e tente novamente.");
+      if (!result.ok) {
+        setError(result.message);
         return;
       }
 
@@ -123,19 +121,21 @@ export function AdminLoginForm({
         <>
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-slate-800">
-              E-mail
+              Usuário
             </span>
             <span className="relative block">
-              <Mail
+              <UserRound
                 aria-hidden="true"
                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400"
               />
               <input
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="voce@mmtintas.com.br"
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="JULIO"
+                spellCheck={false}
+                autoCapitalize="characters"
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-600/10"
                 required
               />
