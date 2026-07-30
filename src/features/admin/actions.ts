@@ -840,6 +840,126 @@ async function syncPromotionProducts(
   }
 }
 
+export type BarcodeProductMatch = {
+  barcode: string;
+  brand?: string;
+  category?: string;
+  description?: string;
+  imageUrl?: string;
+  name: string;
+  source: "catalog" | "external";
+};
+
+const barcodeSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{7,14}$/, "Informe um EAN, UPC ou GTIN de 7 a 14 dígitos.");
+
+export async function lookupBarcodeAction(
+  input: string,
+): Promise<ActionState<BarcodeProductMatch>> {
+  const parsed = barcodeSchema.safeParse(input);
+  if (!parsed.success) return validationFailure(parsed.error);
+
+  try {
+    let supabase:
+      | Awaited<ReturnType<typeof requireRole>>["supabase"]
+      | undefined;
+
+    try {
+      ({ supabase } = await requireRole(STAFF_ROLES));
+    } catch (error) {
+      if (
+        process.env.NODE_ENV === "production" ||
+        !(error instanceof SupabaseAuthError) ||
+        error.code !== "CONFIGURATION"
+      ) {
+        throw error;
+      }
+    }
+
+    if (supabase) {
+      const existing = await supabase
+        .from("products")
+        .select("sku,name,description,brand:brands(name)")
+        .eq("sku", parsed.data)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      if (existing.error) throw existing.error;
+      if (existing.data) {
+        const brand = Array.isArray(existing.data.brand)
+          ? existing.data.brand[0]?.name
+          : existing.data.brand?.name;
+        return {
+          data: {
+            barcode: parsed.data,
+            brand,
+            description: existing.data.description ?? undefined,
+            name: existing.data.name,
+            source: "catalog",
+          },
+          message: "Produto encontrado no catálogo.",
+          ok: true,
+        };
+      }
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 7_000);
+    const response = await fetch(
+      `https://api.upcitemdb.com/prod/trial/lookup?upc=${parsed.data}`,
+      {
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      },
+    ).finally(() => clearTimeout(timeout));
+
+    if (!response.ok) {
+      return {
+        code: "NOT_FOUND",
+        message: "Produto não encontrado na base externa. Preencha manualmente.",
+        ok: false,
+      };
+    }
+
+    const payload = (await response.json()) as {
+      items?: Array<{
+        brand?: string;
+        category?: string;
+        description?: string;
+        images?: string[];
+        title?: string;
+      }>;
+    };
+    const item = payload.items?.[0];
+
+    if (!item?.title) {
+      return {
+        code: "NOT_FOUND",
+        message: "Produto não encontrado. Você pode cadastrá-lo manualmente.",
+        ok: false,
+      };
+    }
+
+    return {
+      data: {
+        barcode: parsed.data,
+        brand: item.brand?.trim() || undefined,
+        category: item.category?.trim() || undefined,
+        description: item.description?.trim() || undefined,
+        imageUrl: item.images?.[0],
+        name: item.title.trim(),
+        source: "external",
+      },
+      message: "Produto localizado pelo código de barras.",
+      ok: true,
+    };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
 export async function listProductsAction(): Promise<
   ActionState<Tables<"products">[]>
 > {

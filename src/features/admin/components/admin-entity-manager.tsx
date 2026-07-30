@@ -45,7 +45,9 @@ import {
   updateProductAction,
   updatePromotionAction,
   uploadMediaAction,
+  type BarcodeProductMatch,
 } from "@/features/admin/actions";
+import { BarcodeProductField } from "@/features/admin/components/barcode-product-field";
 import {
   entityConfigs,
   type AdminEntityKind,
@@ -997,6 +999,32 @@ export function AdminEntityManager({ kind }: AdminEntityManagerProps) {
     }
   }
 
+  function handleBarcodeResolved(match: BarcodeProductMatch) {
+    updateValue("sku", match.barcode);
+    updateValue("name", match.name);
+
+    if (!values.description && match.description) {
+      updateValue("description", match.description);
+    }
+
+    if (match.brand) {
+      const brand = relationOptions.brandId?.find(
+        (option) =>
+          option.label.toLocaleLowerCase("pt-BR") ===
+          match.brand?.toLocaleLowerCase("pt-BR"),
+      );
+      if (brand) updateValue("brandId", brand.value);
+    }
+
+    if (match.category) {
+      const externalCategory = match.category.toLocaleLowerCase("pt-BR");
+      const category = relationOptions.categoryId?.find((option) =>
+        externalCategory.includes(option.label.toLocaleLowerCase("pt-BR")),
+      );
+      if (category) updateValue("categoryId", category.value);
+    }
+  }
+
   function validate() {
     const errors: Record<string, string> = {};
 
@@ -1538,6 +1566,14 @@ export function AdminEntityManager({ kind }: AdminEntityManagerProps) {
                     key={field.name}
                     className={field.fullWidth ? "sm:col-span-2" : undefined}
                   >
+                    {kind === "products" && field.name === "sku" ? (
+                      <BarcodeProductField
+                        value={String(values.sku ?? "")}
+                        error={fieldErrors.sku}
+                        onChange={(value) => updateValue("sku", value)}
+                        onResolved={handleBarcodeResolved}
+                      />
+                    ) : (
                     <FieldControl
                       field={
                         relationOptions[field.name]
@@ -1561,6 +1597,7 @@ export function AdminEntityManager({ kind }: AdminEntityManagerProps) {
                       onChange={updateValue}
                       onFileChange={handleFileChange}
                     />
+                    )}
                   </div>
                 ))}
 
