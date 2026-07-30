@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MM Tintas e Complementos
 
-## Getting Started
+Plataforma digital da MM Tintas e Complementos, construída com Next.js 16,
+React 19, TypeScript, Tailwind CSS 4, shadcn/ui e Supabase.
 
-First, run the development server:
+O projeto reúne site institucional, catálogo, orçamento via WhatsApp, blog,
+calculadora de tinta e painel administrativo.
+
+## Requisitos
+
+- Node.js 24
+- npm 11
+- Projeto Supabase para persistência e autenticação
+
+## Desenvolvimento
+
+```bash
+npm install
+copy .env.example .env.local
+npm run dev
+```
+
+Acesse `http://localhost:3000`.
+
+Sem variáveis do Supabase, o site público usa dados claramente identificados
+como demonstração. O painel demonstrativo fica disponível somente em
+desenvolvimento; em produção, a área administrativa permanece bloqueada até a
+configuração do banco e da autenticação.
+
+## Variáveis de ambiente
+
+| Variável | Uso |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | URL canônica da aplicação |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número com DDI e DDD, apenas dígitos |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | E-mail público de atendimento |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL pública do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave pública recomendada do Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave pública/anon do Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Operações administrativas no servidor; nunca expor no cliente |
+
+## Banco de dados
+
+As migrations versionadas ficam em `supabase/migrations`. Para um projeto
+Supabase conectado:
+
+```bash
+npx supabase link --project-ref SEU_PROJECT_REF
+npx supabase db push
+```
+
+Crie o primeiro usuário pelo Supabase Auth e associe seu perfil ao papel
+`admin`. As políticas RLS continuam sendo a autorização final das operações.
+
+As consultas públicas usam um cliente anônimo sem cookies e cache por domínio
+com revalidação de cinco minutos. Alterações feitas pelo painel invalidam
+imediatamente o cache correspondente.
+
+## Comandos
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Rotas principais
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/` — Home
+- `/catalogo` e `/produtos/[slug]` — catálogo
+- `/marcas` e `/promocoes` — descoberta
+- `/blog` e `/blog/[slug]` — conteúdo
+- `/calculadora` — estimativa de tinta
+- `/sobre` e `/contato` — institucional e orçamento
+- `/login` — autenticação de funcionários
+- `/admin` — painel administrativo
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy na Vercel
 
-## Learn More
+1. Crie um projeto na Vercel a partir do repositório.
+2. Cadastre todas as variáveis de ambiente em Production e Preview.
+3. Configure a URL de produção em `NEXT_PUBLIC_SITE_URL`.
+4. No Supabase Auth, adicione as URLs de produção e preview autorizadas.
+5. Rode as migrations no projeto de produção.
+6. Faça o primeiro deploy e valide login, upload, WhatsApp, metadata e sitemap.
 
-To learn more about Next.js, take a look at the following resources:
+## Checklist antes da publicação
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Substituir todos os dados demonstrativos pelos dados reais.
+- Definir endereço, horários, WhatsApp, e-mail e perfis sociais oficiais.
+- Confirmar marcas, imagens, descrições e disponibilidade dos produtos.
+- Configurar domínio, Supabase, Storage, SMTP e recuperação de senha.
+- Revisar política de privacidade e retenção de solicitações conforme a LGPD.
+- Cadastrar Google Business Profile e Search Console.
+- Fazer testes de compra/orçamento em aparelhos reais.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Arquitetura
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Consulte [ARQUITETURA.md](./ARQUITETURA.md) para decisões técnicas, limites de
+domínio, estratégia de SEO, autenticação e evolução futura.
