@@ -12,7 +12,7 @@ function getPublicSiteUrl() {
     }
   }
 
-  return "http://localhost:3000";
+  return "https://mm-tintas.vercel.app";
 }
 
 export const siteConfig = {

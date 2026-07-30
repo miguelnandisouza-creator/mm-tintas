@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
-import { getPublicBlog } from "@/lib/repositories/public-blog";
-import { getPublicCatalog } from "@/lib/repositories/public-catalog";
 import { getPublicSettings } from "@/lib/repositories/public-settings";
 
 function baseUrl(value: string) {
@@ -14,23 +12,22 @@ function baseUrl(value: string) {
 }
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const [catalog, blog, settings] = await Promise.all([
-    getPublicCatalog(),
-    getPublicBlog(),
-    getPublicSettings(),
-  ]);
+  const settings = await getPublicSettings();
   const base = baseUrl(settings.siteUrl);
-  const hasOnlyDemoContent =
-    catalog.source === "demo" || blog.source === "demo";
+  const publicAccess = {
+    allow: "/",
+    disallow: ["/admin", "/admin/", "/login"],
+  };
 
   return {
     rules: [
       {
+        userAgent: ["ClaudeBot", "Claude-User", "Claude-SearchBot"],
+        ...publicAccess,
+      },
+      {
         userAgent: "*",
-        allow: hasOnlyDemoContent ? undefined : "/",
-        disallow: hasOnlyDemoContent
-          ? "/"
-          : ["/admin", "/admin/", "/login"],
+        ...publicAccess,
       },
     ],
     sitemap: `${base}/sitemap.xml`,
