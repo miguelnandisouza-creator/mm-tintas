@@ -66,11 +66,13 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: settings.businessName,
       title,
       description,
+      images: ["/images/hero-pintura.webp"],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: ["/images/hero-pintura.webp"],
     },
   };
 }
